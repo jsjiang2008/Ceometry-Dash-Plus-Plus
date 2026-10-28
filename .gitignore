@@ -1,0 +1,25 @@
+cat > .gitignore <<'EOF'
+# Build output
+build/
+cmake-build-*/
+
+# C++ compiled files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# Generated models
+models/
+EOF
