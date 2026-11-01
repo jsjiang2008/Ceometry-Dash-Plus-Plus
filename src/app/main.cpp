@@ -11,12 +11,7 @@ int main() {
     }
 
     // This thing creates a pointer to the window that is created with pixel sizes 800 by 600
-    SDL_Window* window = SDL_CreateWindow(
-        "Ceometry Dash++",
-        800,
-        600,
-        0
-    );
+    SDL_Window* window = SDL_CreateWindow("Ceometry Dash++", 800, 600, 0);
 
     // Check if window creation failed or not
     if (!window) {
