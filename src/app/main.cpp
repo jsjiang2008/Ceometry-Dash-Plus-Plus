@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 #include <iostream>
+#include "Player.hpp"
 
 int main() {
     // This if statement checks for if SDL initialized
@@ -41,13 +42,10 @@ int main() {
     SDL_FRect floorRect{0.0f, 500.0f, 800.0f, 100.0f};
     SDL_FRect playerRect{150.0f, 460.0f, 40.0f, 40.0f};
 
-    // Make player physics
-    float yVelocity = 0.0f;
-    bool grounded = true;
+    // Create objects
+    Player player{playerRect.y, playerRect.h};
 
-    // Y increases as you go down so gravity positive, jump velocity negative
-    constexpr float gravity = 1800.0f;      // Pixels per second squared
-    constexpr float jumpVelocity = -650.0f; // Pixels per second
+
     
     // Run the program and get events that happen
     bool running = true;
@@ -74,18 +72,18 @@ int main() {
                 running = false;
             }
             // Check for input to jump
-            // Check if key was pressed down, the key is space or up arrow, 
-            // ignore repeated key events from holding, prevent jumping in midair
-            else if (event.type == SDL_EVENT_KEY_DOWN && 
-                (event.key.key == SDLK_SPACE || event.key.key == SDLK_UP) && 
-                !event.key.repeat && grounded) {
-                    yVelocity = jumpVelocity;
-                    grounded = false;
+            // Check if key was pressed down, the key is space or up arrow
+            else if (event.key.key == SDLK_SPACE || event.key.key == SDLK_UP) {
+                    player.jump();
             }
         }
 
         // If user closes window avoid processing and drawing an extra frame
         if (!running) break;
+
+        // Check if jump keys currently held down
+        const bool* keys = SDL_GetKeyboardState(nullptr);
+        const bool jumpHeld = keys[SDL_SCANCODE_SPACE] || keys[SDL_SCANCODE_UP];
 
         // Calculate how much time physics needs to advance
         Uint64 currentTime = SDL_GetTicksNS();
@@ -100,21 +98,20 @@ int main() {
 
         // Update physics
         while (accumulator >= TPS) {
+            // Move the player and detect landing first.
+            player.update(dt, floorRect.y);
 
-            // Update player velocity and position
-            yVelocity += gravity * dt;
-            playerRect.y += yVelocity * dt;
-
-            // Stop the player at the floor's surface.
-            if (playerRect.y + playerRect.h >= floorRect.y) {
-                playerRect.y = floorRect.y - playerRect.h;
-                yVelocity = 0.0f;
-                grounded = true;
+            // If held, jump as soon as grounded.
+            if (jumpHeld) {
+                player.jump();
             }
 
             accumulator -= TPS;
         }
 
+
+        // Update rectangle position
+        playerRect.y = player.getY();
 
         // Paint the background dark blue
         // Color values are red, green, blue, alpha, where 255 alpha is fully solid, no transparency

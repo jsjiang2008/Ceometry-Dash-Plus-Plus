@@ -20,6 +20,11 @@ FetchContent_MakeAvailable(SDL3)
 
 add_executable(ceometry-dash
     src/app/main.cpp
+    src/core/Player.cpp
+)
+
+target_include_directories(ceometry-dash PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
 target_link_libraries(
