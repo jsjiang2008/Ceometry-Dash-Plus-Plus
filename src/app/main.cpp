@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 #include <iostream>
+#include <array>
 #include "Player.hpp"
 
 int main() {
@@ -39,8 +40,6 @@ int main() {
 
     // Create objects
     Player player{playerRect.y, playerRect.h};
-
-
     
     // Run the program and get events that happen
     bool running = true;
@@ -65,11 +64,6 @@ int main() {
             // Check if user wants to quit
             if (event.type == SDL_EVENT_QUIT) {
                 running = false;
-            }
-            // Check for input to jump
-            // Check if key was pressed down, the key is space or up arrow
-            else if (event.key.key == SDLK_SPACE || event.key.key == SDLK_UP) {
-                    player.jump();
             }
         }
 
@@ -109,7 +103,8 @@ int main() {
         playerRect.y = player.getY();
 
         // Paint the background dark blue
-        // Color values are red, green, blue, alpha, where 255 alpha is fully solid, no transparency
+        // Color values are red, green, blue, alpha
+        // 255 alpha is fully solid, no transparency
         SDL_SetRenderDrawColor(renderer, 20, 25, 40, 255);
 
         // Wipe screen clean
