@@ -34,6 +34,9 @@ int main() {
         return 1;
     }
 
+    // Define default size of one block
+    constexpr float blockSize = 40.0f;
+
     // Create two rectangles, one for the ground, one for the floor
     // The parameters are as follows {distance from left of screen, distance from top of screen, width, height}
     SDL_FRect floorRect{0.0f, 500.0f, 800.0f, 100.0f};
@@ -61,9 +64,10 @@ int main() {
     bool running = true;
     SDL_Event event;
 
-    // Physics advance in steps of 1/120 of a second (Ticks per second)
+    // Physics advance in steps of 1/240 of a second (Ticks per second)
+    // 2.2 Geometry dash uses 240 TPS
     // This way movement stays consistent when rendering speed changes
-    constexpr double TPS = 1.0 / 120.0;
+    constexpr double TPS = 1.0 / 240.0;
     double accumulator = 0.0;
     Uint64 previousTime = SDL_GetTicksNS();
     constexpr float dt = static_cast<float>(TPS);
