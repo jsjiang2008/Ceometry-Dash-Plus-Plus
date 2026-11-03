@@ -48,7 +48,13 @@ int main() {
     float scrollX = 0.0f;
     constexpr float scrollSpeed = 300.0f;
 
-    Spike spike{800.0f, 460.0f, 40.0f, 40.0f};
+    const std::array<Spike,5> spikes {
+        Spike{800.0f, 460.0f, 40.0f, 40.0f},
+        Spike{1000.0f, 460.0f, 40.0f, 40.0f},
+        Spike{1500.0f, 460.0f, 40.0f, 40.0f},
+        Spike{1540.0f, 460.0f, 40.0f, 40.0f},
+        Spike{1580.0f, 460.0f, 40.0f, 40.0f}
+    };
 
     
     // Run the program and get events that happen
@@ -110,14 +116,18 @@ int main() {
 
             // Use player position to check for death
             playerRect.y = player.getY();
-            const SDL_FRect hitbox = spike.getHitbox(scrollX);
-            
-            // If die reset position and scroll
-            if (SDL_HasRectIntersectionFloat(&playerRect, &hitbox)) {
-                player = Player {floorRect.y - playerRect.h, playerRect.h};
-                playerRect.y = player.getY();
-                scrollX = 0.0f;
+            // for loop: const to not change objects, & to access without copying
+            for (const Spike& spike : spikes) {
+                const SDL_FRect hitbox = spike.getHitbox(scrollX);
+                
+                // If die reset position and scroll
+                if (SDL_HasRectIntersectionFloat(&playerRect, &hitbox)) {
+                    player = Player {floorRect.y - playerRect.h, playerRect.h};
+                    playerRect.y = player.getY();
+                    scrollX = 0.0f;
+                }
             }
+            
 
             accumulator -= TPS;
         }
@@ -139,7 +149,9 @@ int main() {
         SDL_RenderFillRect(renderer, &floorRect);
 
         // Draw spikes
-        spike.draw(renderer, scrollX, true);
+        for (const Spike& spike : spikes) {
+            spike.draw(renderer, scrollX, true);
+        }
 
         // Draw the player yellow
         SDL_SetRenderDrawColor(renderer, 255, 210, 50, 255);

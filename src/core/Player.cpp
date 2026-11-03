@@ -1,7 +1,7 @@
 #include "Player.hpp"
 
 // Y increases as you go down so gravity positive, jump velocity negative
-constexpr float gravity = 1800.0f;      // Pixels per second squared
+constexpr float gravity = 2200.0f;      // Pixels per second squared
 constexpr float jumpVelocity = -650.0f; // Pixels per second 
 
 
