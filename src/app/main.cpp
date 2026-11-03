@@ -2,6 +2,7 @@
 #include <iostream>
 #include <array>
 #include "Player.hpp"
+#include "Spike.hpp"
 
 int main() {
     // This if statement checks for if SDL initialized
@@ -39,7 +40,16 @@ int main() {
     SDL_FRect playerRect{150.0f, 460.0f, 40.0f, 40.0f};
 
     // Create objects
+
+    // Player
     Player player{playerRect.y, playerRect.h};
+
+    //Spikes
+    float scrollX = 0.0f;
+    constexpr float scrollSpeed = 300.0f;
+
+    Spike spike{800.0f, 460.0f, 40.0f, 40.0f};
+
     
     // Run the program and get events that happen
     bool running = true;
@@ -95,6 +105,20 @@ int main() {
                 player.jump();
             }
 
+            // Scroll in the level
+            scrollX += scrollSpeed * dt;
+
+            // Use player position to check for death
+            playerRect.y = player.getY();
+            const SDL_FRect hitbox = spike.getHitbox(scrollX);
+            
+            // If die reset position and scroll
+            if (SDL_HasRectIntersectionFloat(&playerRect, &hitbox)) {
+                player = Player {floorRect.y - playerRect.h, playerRect.h};
+                playerRect.y = player.getY();
+                scrollX = 0.0f;
+            }
+
             accumulator -= TPS;
         }
 
@@ -113,6 +137,9 @@ int main() {
         // Draw the floor gray
         SDL_SetRenderDrawColor(renderer, 90, 95, 110, 255);
         SDL_RenderFillRect(renderer, &floorRect);
+
+        // Draw spikes
+        spike.draw(renderer, scrollX, true);
 
         // Draw the player yellow
         SDL_SetRenderDrawColor(renderer, 255, 210, 50, 255);

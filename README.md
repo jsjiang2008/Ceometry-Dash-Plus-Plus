@@ -9,4 +9,10 @@ Run:
 ./build/ceometry-dash
 ```
 
+Build & run:
+```
+cmake --build build --target ceometry-dash -j 2
+./build/ceometry-dash
+```
+
 Commit history documents the progress that I made to build this.
