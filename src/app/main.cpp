@@ -83,6 +83,9 @@ int main() {
 
         playerRect.y = player.getY();
         scrollX = 0.0f;
+
+        accumulator = 0.0;
+        previousTime = SDL_GetTicksNS();
     };
 
     while (running) {
@@ -97,8 +100,6 @@ int main() {
                         event.key.key == SDLK_R && !event.key.repeat) {
                 // If 'R' is pressed restart level
                 restartLevel();
-                accumulator = 0.0;
-                previousTime = SDL_GetTicksNS();
             }
         }
 
@@ -135,15 +136,23 @@ int main() {
 
             // Use player position to check for death
             playerRect.y = player.getY();
+            // Bool to track if death happened
+            bool died = false;
             // for loop: const to not change objects, & to access without copying
             for (const Spike& spike : spikes) {
                 const SDL_FRect hitbox = spike.getHitbox(scrollX);
                 
-                // If die reset position and scroll
+                // Set died to true
                 if (SDL_HasRectIntersectionFloat(&playerRect, &hitbox)) {
-                    restartLevel();
+                    died = true;
                     break;
                 }
+            }
+
+            if (died) {
+                // Restart and leave before subtracting TPS
+                restartLevel();
+                break;
             }
             
 
