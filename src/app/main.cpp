@@ -72,14 +72,33 @@ int main() {
     constexpr Uint64 targetFPS = 60;
     constexpr Uint64 targetFrameNS = 1'000'000'000ULL / targetFPS;
 
+    // Restart method variable/function
+    // Use lambda instead of method to access 
+    // local variables without passing them
+    const auto restartLevel = [&]() {
+        player = Player{
+            floorRect.y - playerRect.h,
+            playerRect.h
+        };
+
+        playerRect.y = player.getY();
+        scrollX = 0.0f;
+    };
+
     while (running) {
         Uint64 frameStart = SDL_GetTicksNS();
 
         // This while loop checks the events that happened since the last frame
         while (SDL_PollEvent(&event)) {
-            // Check if user wants to quit
             if (event.type == SDL_EVENT_QUIT) {
+                // Check if user wants to quit
                 running = false;
+            } else if (event.type == SDL_EVENT_KEY_DOWN && 
+                        event.key.key == SDLK_R && !event.key.repeat) {
+                // If 'R' is pressed restart level
+                restartLevel();
+                accumulator = 0.0;
+                previousTime = SDL_GetTicksNS();
             }
         }
 
@@ -122,9 +141,8 @@ int main() {
                 
                 // If die reset position and scroll
                 if (SDL_HasRectIntersectionFloat(&playerRect, &hitbox)) {
-                    player = Player {floorRect.y - playerRect.h, playerRect.h};
-                    playerRect.y = player.getY();
-                    scrollX = 0.0f;
+                    restartLevel();
+                    break;
                 }
             }
             
