@@ -3,6 +3,7 @@
 #include <array>
 #include "Player.hpp"
 #include "Spike.hpp"
+#include "Block.hpp"
 
 int main() {
     // This if statement checks for if SDL initialized
@@ -47,7 +48,7 @@ int main() {
     // Player
     Player player{playerRect.y, playerRect.h};
 
-    //Spikes
+    // Spikes
     float scrollX = 0.0f;
     constexpr float scrollSpeed = 10.386f * blockSize; // 10.386 is measured block speed in original game
 
@@ -58,6 +59,8 @@ int main() {
         Spike{1540.0f, floorRect.y - blockSize, blockSize, blockSize},
         Spike{1580.0f, floorRect.y - blockSize, blockSize, blockSize}
     };
+
+    // Blocks
 
     
     // Run the program and get events that happen
