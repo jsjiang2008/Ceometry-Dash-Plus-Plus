@@ -40,7 +40,7 @@ int main() {
     // Create two rectangles, one for the ground, one for the floor
     // The parameters are as follows {distance from left of screen, distance from top of screen, width, height}
     SDL_FRect floorRect{0.0f, 500.0f, 800.0f, 100.0f};
-    SDL_FRect playerRect{150.0f, 460.0f, 40.0f, 40.0f};
+    SDL_FRect playerRect{150.0f, 460.0f, blockSize, blockSize};
 
     // Create objects
 
@@ -49,14 +49,14 @@ int main() {
 
     //Spikes
     float scrollX = 0.0f;
-    constexpr float scrollSpeed = 300.0f;
+    constexpr float scrollSpeed = 10.386f * blockSize; // 10.386 is measured block speed in original game
 
     const std::array<Spike,5> spikes {
-        Spike{800.0f, 460.0f, 40.0f, 40.0f},
-        Spike{1000.0f, 460.0f, 40.0f, 40.0f},
-        Spike{1500.0f, 460.0f, 40.0f, 40.0f},
-        Spike{1540.0f, 460.0f, 40.0f, 40.0f},
-        Spike{1580.0f, 460.0f, 40.0f, 40.0f}
+        Spike{800.0f, floorRect.y - blockSize, blockSize, blockSize},
+        Spike{1000.0f, floorRect.y - blockSize, blockSize, blockSize},
+        Spike{1500.0f, floorRect.y - blockSize, blockSize, blockSize},
+        Spike{1540.0f, floorRect.y - blockSize, blockSize, blockSize},
+        Spike{1580.0f, floorRect.y - blockSize, blockSize, blockSize}
     };
 
     

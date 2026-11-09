@@ -1,9 +1,10 @@
 #include "Player.hpp"
+#include <algorithm>
 
 // Y increases as you go down so gravity positive, jump velocity negative
-constexpr float gravity = 2200.0f;      // Pixels per second squared
-constexpr float jumpVelocity = -650.0f; // Pixels per second 
-
+constexpr float gravity = 3779.7296f;
+constexpr float jumpVelocity = -805.9536f;  
+constexpr float maxFallSpeed = 1080.144f;
 
 // Constructor
 Player::Player(float initialY, float h) {
@@ -23,7 +24,8 @@ void Player::jump() {
 
 // Update position and velocity every frame
 void Player::update(float dt, float floorY) {
-    yVelocity += gravity * dt;
+    // Cube has a max fall speed in the original game
+    yVelocity = std::min(yVelocity + gravity * dt, maxFallSpeed);
     yPosition += yVelocity * dt;
     if (yPosition + playerHeight >= floorY) {
         yPosition = floorY - playerHeight;
