@@ -160,9 +160,8 @@ int main() {
                     const bool crossedTop =
                         previousBottom <= box.y &&
                         currentBottom >= box.y;
-
-                    if (overlapsHorizontally && crossedTop &&
-                        box.y < landingY) {
+                    
+                    if (overlapsHorizontally && crossedTop && box.y < landingY) {
                         landingY = box.y;
                     }
                 }
@@ -178,6 +177,21 @@ int main() {
             bool died = false;
 
 
+            // See if crash into block
+            for (const Block& block : blocks) {
+                const SDL_FRect box = block.getHitbox(scrollX);
+
+                const bool overlaps =
+                    playerRect.x < box.x + box.w &&
+                    playerRect.x + playerRect.w > box.x &&
+                    playerRect.y < box.y + box.h &&
+                    playerRect.y + playerRect.h > box.y;
+
+                if (overlaps) {
+                    died = true;
+                    break;
+                }
+            }
 
             // for loop: const to not change objects, & to access without copying
             for (const Spike& spike : spikes) {
