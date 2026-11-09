@@ -133,23 +133,56 @@ int main() {
 
         // Update physics
         while (accumulator >= TPS) {
+            // Remember previous surface
+            const float previousBottom = player.getY() + playerRect.h;
+
             // Move the player and detect landing first.
             player.update(dt, floorRect.y);
-
-            // If held, jump as soon as grounded.
-            if (jumpHeld) {
-                player.jump();
-            }
 
             // Scroll in the level
             scrollX += scrollSpeed * dt;
 
             // Use player position to check for death
             playerRect.y = player.getY();
+            const float currentBottom = playerRect.y + playerRect.h;
+
+            // Find the highest block top crossed during this step.
+            float landingY = floorRect.y;
+
+            if (player.isFalling()) {
+                for (const Block& block : blocks) {
+                    const SDL_FRect box = block.getHitbox(scrollX);
+
+                    const bool overlapsHorizontally =
+                        playerRect.x < box.x + box.w &&
+                        playerRect.x + playerRect.w > box.x;
+
+                    const bool crossedTop =
+                        previousBottom <= box.y &&
+                        currentBottom >= box.y;
+
+                    if (overlapsHorizontally && crossedTop &&
+                        box.y < landingY) {
+                        landingY = box.y;
+                    }
+                }
+            }
+
+                if (landingY < floorRect.y) {
+                    player.landOn(landingY);
+                    playerRect.y = player.getY();
+                }
+
+
             // Bool to track if death happened
             bool died = false;
+
+
+
             // for loop: const to not change objects, & to access without copying
             for (const Spike& spike : spikes) {
+                if (died) break;
+
                 const SDL_FRect hitbox = spike.getHitbox(scrollX);
                 
                 // Set died to true
@@ -165,6 +198,10 @@ int main() {
                 break;
             }
             
+            // If held, jump as soon as grounded.
+            if (jumpHeld) {
+                player.jump();
+            }
 
             accumulator -= TPS;
         }

@@ -18,4 +18,8 @@ public:
     float getY() const {
         return yPosition; 
     }
+    void landOn(float surfaceY);
+    bool isFalling() const {
+        return yVelocity >= 0.0f;
+    }
 };

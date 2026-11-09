@@ -22,15 +22,25 @@ void Player::jump() {
     }
 }
 
+// Landing
+void Player::landOn(float surfaceY) {
+    yPosition = surfaceY - playerHeight;
+    yVelocity = 0.0f;
+    grounded = true;
+}
+
 // Update position and velocity every frame
 void Player::update(float dt, float floorY) {
+    // Recheck support each step, including after leaving a block
+    grounded = false;
+
     // Cube has a max fall speed in the original game
     yVelocity = std::min(yVelocity + gravity * dt, maxFallSpeed);
     yPosition += yVelocity * dt;
+
+
     if (yPosition + playerHeight >= floorY) {
-        yPosition = floorY - playerHeight;
-        yVelocity = 0.0f;
-        grounded = true;
+        landOn(floorY);
     }
 }
 
