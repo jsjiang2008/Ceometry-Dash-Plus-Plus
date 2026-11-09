@@ -61,7 +61,10 @@ int main() {
     };
 
     // Blocks
-
+    const std::array<Block,2> blocks {
+        Block{400.0f, floorRect.y - blockSize, blockSize, blockSize},
+        Block{400.0f, floorRect.y - 2 * blockSize, blockSize, blockSize}
+    };
     
     // Run the program and get events that happen
     bool running = true;
@@ -185,6 +188,10 @@ int main() {
         // Draw spikes
         for (const Spike& spike : spikes) {
             spike.draw(renderer, scrollX, true);
+        }
+
+        for (const Block& block : blocks) {
+            block.draw(renderer, scrollX, true);
         }
 
         // Draw the player yellow
