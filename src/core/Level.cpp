@@ -28,12 +28,21 @@ Level Level::loadFromFile(const std::filesystem::path& path,
 
         // Everything after # is a comment; blank lines are allowed.
         const auto comment = line.find('#');
+
+        // If there is a #, erase it from the string
         if (comment != std::string::npos) {
             line.erase(comment);
         }
 
+        // Extract line into a String
         std::istringstream fields(line);
+
+        // Read in line using classic C style rules
+        // This means always use a . for decimals
+        // No comma separation for numbers
         fields.imbue(std::locale::classic());
+
+
         std::string type;
         if (!(fields >> type)) {
             continue;

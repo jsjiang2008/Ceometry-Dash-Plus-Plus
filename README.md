@@ -21,6 +21,10 @@ Commit history documents the progress that I made to build this.
 A C++20 and SDL3 platformer prototype. Hold Space or Up to jump; press R to
 restart the current attempt.
 
+Reach the green flag to complete the level. It is placed twelve grid cells
+past the final object. A completion banner pauses gameplay; R starts a new
+attempt. The first level uses singles, doubles, and broad one-cell steps.
+
 ## Build and run
 
 ```bash

@@ -1,4 +1,5 @@
 #include <SDL3/SDL.h>
+#include <algorithm>
 #include <exception>
 #include <filesystem>
 #include <iostream>
@@ -83,6 +84,19 @@ int main(int argc, char* argv[]) {
 
     const auto& spikes = level.getSpikes();
     const auto& blocks = level.getBlocks();
+
+    // Leave a clear runout after the last object, then finish the level.
+    float lastObjectRight = playerRect.x;
+    for (const Block& block : blocks) {
+        const SDL_FRect rect = block.getVisualRect(0.0f);
+        lastObjectRight = std::max(lastObjectRight, rect.x + rect.w);
+    }
+    for (const Spike& spike : spikes) {
+        const SDL_FRect rect = spike.getVisualRect(0.0f);
+        lastObjectRight = std::max(lastObjectRight, rect.x + rect.w);
+    }
+    const float finishX = lastObjectRight + 12.0f * blockSize;
+    bool levelComplete = false;
     
     // Run the program and get events that happen
     bool running = true;
@@ -111,6 +125,8 @@ int main(int argc, char* argv[]) {
 
         playerRect.y = player.getY();
         scrollX = 0.0f;
+        levelComplete = false;
+        SDL_SetWindowTitle(window, "Ceometry Dash++");
 
         accumulator = 0.0;
         previousTime = SDL_GetTicksNS();
@@ -148,6 +164,10 @@ int main(int argc, char* argv[]) {
 
         // Increment how much catch up time
         accumulator += elapsed;
+
+        if (levelComplete) {
+            accumulator = 0.0;
+        }
 
         // Update physics
         while (accumulator >= TPS) {
@@ -229,6 +249,13 @@ int main(int argc, char* argv[]) {
                 restartLevel();
                 break;
             }
+
+            if (playerRect.x + scrollX >= finishX) {
+                levelComplete = true;
+                accumulator = 0.0;
+                SDL_SetWindowTitle(window, "Level complete! Press R to restart");
+                break;
+            }
             
             // If held, jump as soon as grounded.
             if (jumpHeld) {
@@ -263,9 +290,31 @@ int main(int argc, char* argv[]) {
             block.draw(renderer, scrollX, true);
         }
 
+        // Green flag marks the end of the clear runout.
+        const SDL_FRect finishPole{finishX - scrollX, floorRect.y - 160.0f, 4.0f, 160.0f};
+        const SDL_FRect finishFlag{finishPole.x + finishPole.w, finishPole.y, 44.0f, 24.0f};
+        SDL_SetRenderDrawColor(renderer, 60, 220, 120, 255);
+        SDL_RenderFillRect(renderer, &finishPole);
+        SDL_RenderFillRect(renderer, &finishFlag);
+
         // Draw the player yellow
         SDL_SetRenderDrawColor(renderer, 255, 210, 50, 255);
         SDL_RenderFillRect(renderer, &playerRect);
+
+        if (levelComplete) {
+            const SDL_FRect panel{180.0f, 210.0f, 440.0f, 120.0f};
+            SDL_SetRenderDrawColor(renderer, 20, 25, 40, 255);
+            SDL_RenderFillRect(renderer, &panel);
+            SDL_SetRenderDrawColor(renderer, 60, 220, 120, 255);
+            SDL_RenderRect(renderer, &panel);
+
+            // SDL's built-in font is sufficient for this prototype's banner.
+            SDL_SetRenderScale(renderer, 2.0f, 2.0f);
+            SDL_RenderDebugText(renderer, 140.0f, 120.0f, "LEVEL COMPLETE!");
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderDebugText(renderer, 128.0f, 140.0f, "Press R to restart");
+            SDL_SetRenderScale(renderer, 1.0f, 1.0f);
+        }
 
         // Show the completed frame
         SDL_RenderPresent(renderer);
