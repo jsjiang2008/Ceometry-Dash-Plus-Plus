@@ -45,40 +45,48 @@ Level Level::loadFromFile(const std::filesystem::path& path,
 
         std::string type;
         if (!(fields >> type)) {
+            // If extraction failed, continue
             continue;
         }
 
+        // Lambda for if reading a line fails
         const auto fail = [&](const std::string& message) {
             throw std::runtime_error(path.string() + ":" +
                                      std::to_string(lineNumber) + ": " + message);
         };
 
+        // Check if valid type
         if (type != "block" && type != "spike") {
             fail("Unknown object type '" + type + "'; expected block or spike");
         }
 
+        // Check if valid parameters
         float column, row, width, height;
         if (!(fields >> column >> row >> width >> height)) {
             fail("Expected: type column row width height (four numbers)");
         }
 
+        // Check if uneccessary info was added after
         std::string extra;
         if (fields >> extra) {
             fail("Unexpected extra field '" + extra + "'");
         }
 
+        // Check that parameters are actual numbers
         if (!std::isfinite(column) || !std::isfinite(row) ||
             !std::isfinite(width) || !std::isfinite(height) ||
             column < 0.0f || row < 0.0f || width <= 0.0f || height <= 0.0f) {
             fail("Coordinates must be finite and nonnegative; sizes must be finite and positive");
         }
 
+        // Convert file info into coordinates that the program can understand
         // Row 0 rests on the floor; larger rows place objects higher.
         const float x = column * blockSize;
         const float y = floorY - (row + height) * blockSize;
         const float w = width * blockSize;
         const float h = height * blockSize;
 
+        // Check if objects have valid coordinates within range
         if (!std::isfinite(x) || !std::isfinite(y) ||
             !std::isfinite(w) || !std::isfinite(h) ||
             !std::isfinite(x + w) || !std::isfinite(y + h) ||
@@ -86,13 +94,16 @@ Level Level::loadFromFile(const std::filesystem::path& path,
             fail("Object coordinates or dimensions are outside the supported range");
         }
 
+        // Add object in as either block or spike
         if (type == "block") {
             level.blocks.emplace_back(x, y, w, h);
-        } else {
+        } else if (type == "spike") {
             level.spikes.emplace_back(x, y, w, h);
         }
     }
 
+
+    // Check for fatal error
     if (file.bad()) {
         throw std::runtime_error("Error reading level file: " + path.string());
     }
