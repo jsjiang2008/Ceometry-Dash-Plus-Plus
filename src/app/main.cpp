@@ -1,11 +1,18 @@
 #include <SDL3/SDL.h>
+#include <exception>
+#include <filesystem>
 #include <iostream>
-#include <array>
+#include <stdexcept>
+#include <string_view>
 #include "Player.hpp"
-#include "Spike.hpp"
-#include "Block.hpp"
+#include "Level.hpp"
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc > 2 || (argc == 2 && std::string_view(argv[1]) == "--help")) {
+        std::cout << "Usage: ceometry-dash [path/to/level.level]\n";
+        return argc > 2 ? 1 : 0;
+    }
+
     // This if statement checks for if SDL initialized
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL initialization failed: "
@@ -41,7 +48,7 @@ int main() {
     // Create two rectangles, one for the ground, one for the floor
     // The parameters are as follows {distance from left of screen, distance from top of screen, width, height}
     SDL_FRect floorRect{0.0f, 500.0f, 800.0f, 100.0f};
-    SDL_FRect playerRect{150.0f, 460.0f, blockSize, blockSize};
+    SDL_FRect playerRect{150.0f, floorRect.y - blockSize, blockSize, blockSize};
 
     // Create objects
 
@@ -52,19 +59,30 @@ int main() {
     float scrollX = 0.0f;
     constexpr float scrollSpeed = 10.386f * blockSize; // 10.386 is measured block speed in original game
 
-    const std::array<Spike,5> spikes {
-        Spike{800.0f, floorRect.y - blockSize, blockSize, blockSize},
-        Spike{1000.0f, floorRect.y - blockSize, blockSize, blockSize},
-        Spike{1500.0f, floorRect.y - blockSize, blockSize, blockSize},
-        Spike{1540.0f, floorRect.y - blockSize, blockSize, blockSize},
-        Spike{1580.0f, floorRect.y - blockSize, blockSize, blockSize}
-    };
+    // Load the chosen file, or the default level beside the executable.
+    Level level;
+    try {
+        std::filesystem::path levelPath;
+        if (argc == 2) {
+            levelPath = argv[1];
+        } else {
+            const char* basePath = SDL_GetBasePath();
+            if (!basePath) {
+                throw std::runtime_error(SDL_GetError());
+            }
+            levelPath = std::filesystem::path(basePath) / "levels" / "first.level";
+        }
+        level = Level::loadFromFile(levelPath, blockSize, floorRect.y);
+    } catch (const std::exception& error) {
+        std::cerr << "Level loading failed: " << error.what() << '\n';
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
 
-    // Blocks
-    const std::array<Block,2> blocks {
-        Block{400.0f, floorRect.y - blockSize, blockSize, blockSize},
-        Block{400.0f, floorRect.y - 2 * blockSize, blockSize, blockSize}
-    };
+    const auto& spikes = level.getSpikes();
+    const auto& blocks = level.getBlocks();
     
     // Run the program and get events that happen
     bool running = true;

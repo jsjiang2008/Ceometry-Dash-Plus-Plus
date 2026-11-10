@@ -21,6 +21,7 @@ FetchContent_MakeAvailable(SDL3)
 add_executable(ceometry-dash
     src/app/main.cpp
     src/core/Player.cpp
+    src/core/Level.cpp
 )
 
 target_include_directories(ceometry-dash PRIVATE
@@ -30,3 +31,12 @@ target_include_directories(ceometry-dash PRIVATE
 target_link_libraries(
     ceometry-dash PRIVATE SDL3::SDL3
 )
+
+# Refresh level data on every build, even when no C++ files changed.
+add_custom_target(copy_levels
+    COMMAND "${CMAKE_COMMAND}" -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/levels"
+        "$<TARGET_FILE_DIR:ceometry-dash>/levels"
+    VERBATIM
+)
+add_dependencies(ceometry-dash copy_levels)

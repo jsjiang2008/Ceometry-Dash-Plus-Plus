@@ -1,0 +1,15 @@
+# Each line: type column row width height
+# All numbers are in grid cells. Row 0 rests on the floor.
+
+# Two stacked blocks.
+block 10 0 1 1
+block 10 1 1 1
+
+# Individual spikes.
+spike 20 0 1 1
+spike 25 0 1 1
+
+# Three adjacent spikes. Half-cell positions preserve the original layout.
+spike 37.5 0 1 1
+spike 38.5 0 1 1
+spike 39.5 0 1 1
