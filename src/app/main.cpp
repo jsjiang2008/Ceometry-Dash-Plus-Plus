@@ -54,7 +54,10 @@ int main(int argc, char* argv[]) {
     // Create objects
 
     // Player
+    // Change to Ship to try flying before mode-changing portals are added.
+    constexpr PlayerMode startingMode = PlayerMode::Ship;
     Player player{playerRect.y, playerRect.h};
+    player.setMode(startingMode);
 
     // Spikes
     float scrollX = 0.0f;
@@ -127,6 +130,7 @@ int main(int argc, char* argv[]) {
             floorRect.y - playerRect.h,
             playerRect.h
         };
+        player.setMode(startingMode);
 
 
         // Reset stuff
@@ -162,7 +166,7 @@ int main(int argc, char* argv[]) {
         // If user closes window avoid processing and drawing an extra frame
         if (!running) break;
 
-        // Check if jump keys currently held down
+        // The same keys control cube jumps and ship thrust.
         const bool* keys = SDL_GetKeyboardState(nullptr);
         const bool jumpHeld = keys[SDL_SCANCODE_SPACE] || keys[SDL_SCANCODE_UP];
 
@@ -195,7 +199,7 @@ int main(int argc, char* argv[]) {
             const float previousBottom = player.getY() + playerRect.h;
 
             // Move the player and detect landing first.
-            player.update(dt, floorRect.y);
+            player.update(dt, floorRect.y, jumpHeld);
 
             // Scroll in the level
             scrollX += scrollSpeed * dt;
@@ -278,7 +282,7 @@ int main(int argc, char* argv[]) {
                 break;
             }
             
-            // If held, jump as soon as grounded.
+            // Cubes jump as soon as grounded; ships already applied thrust in update().
             if (jumpHeld) {
                 player.jump();
             }
