@@ -97,6 +97,11 @@ int main(int argc, char* argv[]) {
     }
     const float finishX = lastObjectRight + 12.0f * blockSize;
     bool levelComplete = false;
+
+    // Track whether the death animation is playing and its elapsed time.
+    bool dying = false;
+    float deathTimer = 0.0f; // Seconds since the collision.
+    constexpr float deathDuration = 0.4f; // Seconds before automatically restarting.
     
     // Run the program and get events that happen
     bool running = true;
@@ -123,9 +128,16 @@ int main(int argc, char* argv[]) {
             playerRect.h
         };
 
+
+        // Reset stuff
         playerRect.y = player.getY();
         scrollX = 0.0f;
         levelComplete = false;
+
+        // Cancel any death animation when restarting, including with R.
+        dying = false;
+        deathTimer = 0.0f;
+
         SDL_SetWindowTitle(window, "Ceometry Dash++");
 
         accumulator = 0.0;
@@ -162,11 +174,19 @@ int main(int argc, char* argv[]) {
         // Limit how much catch up work is done to account for if a window was paused
         if (elapsed > 0.25) elapsed = 0.25;
 
-        // Increment how much catch up time
-        accumulator += elapsed;
+        // Advance the death animation while physics and scrolling stay paused.
+        if (dying) {
+            accumulator = 0.0; // Keep the physics loop from running during the animation.
+            deathTimer += static_cast<float>(elapsed);
 
-        if (levelComplete) {
+            // Restart only after the animation has finished.
+            if (deathTimer >= deathDuration) {
+                restartLevel();
+            }
+        } else if (levelComplete) {
             accumulator = 0.0;
+        } else {
+            accumulator += elapsed;
         }
 
         // Update physics
@@ -234,7 +254,6 @@ int main(int argc, char* argv[]) {
             // for loop: const to not change objects, & to access without copying
             for (const Spike& spike : spikes) {
                 if (died) break;
-
                 const SDL_FRect hitbox = spike.getHitbox(scrollX);
                 
                 // Set died to true
@@ -245,9 +264,11 @@ int main(int argc, char* argv[]) {
             }
 
             if (died) {
-                // Restart and leave before subtracting TPS
-                restartLevel();
-                break;
+                // Start the animation instead of restarting immediately.
+                dying = true;
+                deathTimer = 0.0f;
+                accumulator = 0.0; // Discard unused physics time from this frame.
+                break; // Leave the physics loop; drawing below still runs.
             }
 
             if (playerRect.x + scrollX >= finishX) {
@@ -297,9 +318,34 @@ int main(int argc, char* argv[]) {
         SDL_RenderFillRect(renderer, &finishPole);
         SDL_RenderFillRect(renderer, &finishFlag);
 
-        // Draw the player yellow
-        SDL_SetRenderDrawColor(renderer, 255, 210, 50, 255);
-        SDL_RenderFillRect(renderer, &playerRect);
+        // Animate a copy so the player's position and hitbox stay unchanged.
+        SDL_FRect drawRect = playerRect;
+        Uint8 alpha = 255;
+
+        if (dying) {
+            // Animation progress: 0 is the start, 1 is the end; clamp keeps it in range.
+            const float progress = std::clamp(
+                deathTimer / deathDuration, 0.0f, 1.0f
+            );
+
+            // Grow from the original size toward three times its width and height.
+            const float scale = 1.0f + progress * 2.0f;
+            drawRect.w = playerRect.w * scale;
+            drawRect.h = playerRect.h * scale;
+
+            // Move the top-left corner so the growing rectangle stays centered.
+            drawRect.x -= (drawRect.w - playerRect.w) / 2.0f;
+            drawRect.y -= (drawRect.h - playerRect.h) / 2.0f;
+
+            // Fade alpha from 255 (solid) toward 0 (invisible).
+            alpha = static_cast<Uint8>(255.0f * (1.0f - progress));
+        }
+
+        // Blending makes alpha control how much of the background shows through.
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(renderer, 255, 210, 50, alpha);
+        SDL_RenderFillRect(renderer, &drawRect);
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE); // Restore normal drawing.
 
         if (levelComplete) {
             const SDL_FRect panel{180.0f, 210.0f, 440.0f, 120.0f};
