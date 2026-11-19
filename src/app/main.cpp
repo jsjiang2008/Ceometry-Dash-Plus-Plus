@@ -166,7 +166,7 @@ int main(int argc, char* argv[]) {
         // If user closes window avoid processing and drawing an extra frame
         if (!running) break;
 
-        // The same keys control cube jumps and ship thrust.
+        // Check for if input is held down.
         const bool* keys = SDL_GetKeyboardState(nullptr);
         const bool jumpHeld = keys[SDL_SCANCODE_SPACE] || keys[SDL_SCANCODE_UP];
 

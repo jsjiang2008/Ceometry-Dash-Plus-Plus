@@ -48,6 +48,29 @@ explicit source-file path, you can edit the level and relaunch immediately;
 no rebuild is needed. R resets the attempt using the already-loaded objects;
 it does not reread the file.
 
+## Ship practice level
+
+`levels/ship_test.level` is a short flight course with a wide corridor, four
+alternating floor and ceiling pillars, and two floor spikes. Leave room to
+brake: holding Space or Up accelerates upward, and releasing accelerates
+downward, so the ship takes time to reverse direction.
+
+Set `startingMode` in `src/app/main.cpp` to `PlayerMode::Ship`, then run:
+
+```bash
+cmake --build build --target ceometry-dash -j 2
+./build/ceometry-dash levels/ship_test.level
+```
+
+The course takes about eleven seconds. Climb over the floor pillars and
+descend below the ceiling pillars. Hitting a pillar's side, the roof's
+underside, or a spike plays the death animation and restarts the attempt.
+The floor and block tops remain safe landing surfaces. Press R to restart
+manually; both restart paths restore the configured starting mode.
+
+Reach the green flag to finish. This course uses the current prototype ship
+physics and square graphic; portals are a later step.
+
 ## Level format
 
 Each nonempty line describes one object:

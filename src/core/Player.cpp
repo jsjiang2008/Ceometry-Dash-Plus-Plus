@@ -19,7 +19,7 @@ Player::Player(float initialY, float h) {
     playerHeight = h;
 }
 
-// Only cubes jump; ships use continuous thrust in update().
+// If the player is a cube, jump
 void Player::jump() {
     if (mode == PlayerMode::Cube && grounded) {
         yVelocity = jumpVelocity;
