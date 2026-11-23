@@ -19,7 +19,7 @@ Commit history documents the progress that I made to build this.
 # Ceometry Dash++
 
 A C++20 and SDL3 platformer prototype. Hold Space or Up to jump; press R to
-restart the current attempt.
+restart the current attempt. Press H to show or hide the red hitbox outlines.
 
 Reach the green flag to complete the level. It is placed twelve grid cells
 past the final object. A completion banner pauses gameplay; R starts a new

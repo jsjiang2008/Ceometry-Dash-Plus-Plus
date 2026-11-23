@@ -116,6 +116,9 @@ int main(int argc, char* argv[]) {
     bool dying = false;
     float deathTimer = 0.0f; // Seconds since the collision.
     constexpr float deathDuration = 0.4f; // Seconds before automatically restarting.
+
+    // Red hitbox outlines are a debugging aid; H toggles them.
+    bool showHitboxes = false;
     
     // Run the program and get events that happen
     bool running = true;
@@ -172,6 +175,10 @@ int main(int argc, char* argv[]) {
                         event.key.key == SDLK_R && !event.key.repeat) {
                 // If 'R' is pressed restart level
                 restartLevel();
+            } else if (event.type == SDL_EVENT_KEY_DOWN &&
+                        event.key.key == SDLK_H && !event.key.repeat) {
+                // If 'H' is pressed show or hide hitboxes
+                showHitboxes = !showHitboxes;
             }
         }
 
@@ -331,11 +338,11 @@ int main(int argc, char* argv[]) {
 
         // Draw spikes
         for (const Spike& spike : spikes) {
-            spike.draw(renderer, scrollX, true);
+            spike.draw(renderer, scrollX, showHitboxes);
         }
 
         for (const Block& block : blocks) {
-            block.draw(renderer, scrollX, true);
+            block.draw(renderer, scrollX, showHitboxes);
         }
 
         for (std::size_t i = 0; i < portals.size(); ++i) {
