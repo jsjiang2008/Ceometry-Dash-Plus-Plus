@@ -22,6 +22,7 @@ Level Level::loadFromFile(const std::filesystem::path& path,
     Level level;
     std::string line;
     std::size_t lineNumber = 0;
+    bool sawStart = false;
 
     while (std::getline(file, line)) {
         ++lineNumber;
@@ -55,11 +56,32 @@ Level Level::loadFromFile(const std::filesystem::path& path,
                                      std::to_string(lineNumber) + ": " + message);
         };
 
+        // "start cube" or "start ship" sets the mode each attempt begins in.
+        if (type == "start") {
+            if (sawStart) {
+                fail("Only one start line is allowed");
+            }
+            sawStart = true;
+
+            std::string mode;
+            if (!(fields >> mode) || (mode != "cube" && mode != "ship")) {
+                fail("Expected: start cube  or  start ship");
+            }
+
+            std::string extra;
+            if (fields >> extra) {
+                fail("Unexpected extra field '" + extra + "'");
+            }
+
+            level.startingMode = mode == "ship" ? PlayerMode::Ship : PlayerMode::Cube;
+            continue;
+        }
+
         // Check if valid type
         if (type != "block" && type != "spike" &&
             type != "portal_cube" && type != "portal_ship") {
             fail("Unknown object type '" + type +
-                 "'; expected block, spike, portal_cube, or portal_ship");
+                 "'; expected start, block, spike, portal_cube, or portal_ship");
         }
 
         // Check if valid parameters

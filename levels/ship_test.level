@@ -1,7 +1,8 @@
 # Short ship practice course: about 11 seconds at the current scroll speed.
-# Run with startingMode set to PlayerMode::Ship in src/app/main.cpp.
 # Hold Space/Up to rise; release to descend; R restarts in ship mode.
 # Each object: type column row width height (one cell = 40 pixels).
+
+start ship
 
 # A roof and the existing ground form a corridor ten cells high.
 # The roof's underside is at y = 100; the floor is at y = 500.

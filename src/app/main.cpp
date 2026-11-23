@@ -54,11 +54,8 @@ int main(int argc, char* argv[]) {
 
     // Create objects
 
-    // Player
-    // The starting mode is restored on restart; portals can change it during play.
-    constexpr PlayerMode startingMode = PlayerMode::Ship;
+    // Player (its starting mode comes from the level file, loaded below)
     Player player{playerRect.y, playerRect.h};
-    player.setMode(startingMode);
 
     // Spikes
     float scrollX = 0.0f;
@@ -85,6 +82,11 @@ int main(int argc, char* argv[]) {
         SDL_Quit();
         return 1;
     }
+
+    // The level chooses the starting mode (cube unless it has "start ship").
+    // It is restored on restart; portals can change the mode during play.
+    const PlayerMode startingMode = level.getStartingMode();
+    player.setMode(startingMode);
 
     const auto& spikes = level.getSpikes();
     const auto& blocks = level.getBlocks();

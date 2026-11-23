@@ -13,6 +13,9 @@ private:
     std::vector<Spike> spikes;
     std::vector<Portal> portals;
 
+    // Mode at the start of every attempt; a "start ship" line changes it.
+    PlayerMode startingMode = PlayerMode::Cube;
+
 public:
     // Read grid coordinates and convert them into world-space rectangles.
     // Throws std::runtime_error if the file cannot be read or is invalid.
@@ -29,5 +32,9 @@ public:
 
     const std::vector<Portal>& getPortals() const {
         return portals;
+    }
+
+    PlayerMode getStartingMode() const {
+        return startingMode;
     }
 };

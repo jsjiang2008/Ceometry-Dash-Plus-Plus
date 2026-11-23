@@ -55,7 +55,7 @@ alternating floor and ceiling pillars, and two floor spikes. Leave room to
 brake: holding Space or Up accelerates upward, and releasing accelerates
 downward, so the ship takes time to reverse direction.
 
-Set `startingMode` in `src/app/main.cpp` to `PlayerMode::Ship`, then run:
+The file begins with `start ship`, so it starts in ship mode. Run:
 
 ```bash
 cmake --build build --target ceometry-dash -j 2
@@ -66,7 +66,7 @@ The course takes about eleven seconds. Climb over the floor pillars and
 descend below the ceiling pillars. Hitting a pillar's side, the roof's
 underside, or a spike plays the death animation and restarts the attempt.
 The floor and block tops remain safe landing surfaces. Press R to restart
-manually; both restart paths restore the configured starting mode.
+manually; both restart paths restore the level's starting mode.
 
 Reach the green flag to finish. This course uses the current prototype ship
 physics and square graphic.
@@ -84,7 +84,7 @@ changes movement mode while preserving position and vertical momentum.
 The mode label at the top left shows which controls are active.
 
 Each gate activates once per attempt and turns gray after use. R and death
-reset every gate and restore `startingMode`. The gates are not solid and
+reset every gate and restore the level's starting mode. The gates are not solid and
 do not cause damage. Overlapping gates activate in file order if touched
 in the same physics step. The finish flag also accounts for portal positions.
 
@@ -103,6 +103,15 @@ type column row width height
 - Width and height must be positive. Coordinates must be nonnegative.
 - Decimal values such as `37.5` are allowed.
 - Blank lines and `#` comments, including comments after an object, are allowed.
+
+One optional line sets the mode every attempt starts in:
+
+```text
+start ship    # or: start cube
+```
+
+Without a `start` line the level starts in cube mode. A second `start` line,
+or a mode other than `cube` or `ship`, is an error.
 
 For example:
 
@@ -131,7 +140,7 @@ heightPixels = height * blockSize
 ```
 
 An invalid line stops loading and reports the file name, line number, and
-reason in the terminal. The format describes blocks, spikes, and mode portals;
+reason in the terminal. The format describes the starting mode, blocks, spikes, and mode portals;
 player physics, floor height, and scrolling speed remain configured in C++.
 
 `include/Level.hpp` owns vectors of blocks, spikes, and portals, and `src/core/Level.cpp`
