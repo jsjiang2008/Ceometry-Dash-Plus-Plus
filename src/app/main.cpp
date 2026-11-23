@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string_view>
+#include <vector>
 #include "Player.hpp"
 #include "Level.hpp"
 
@@ -54,7 +55,7 @@ int main(int argc, char* argv[]) {
     // Create objects
 
     // Player
-    // Change to Ship to try flying before mode-changing portals are added.
+    // The starting mode is restored on restart; portals can change it during play.
     constexpr PlayerMode startingMode = PlayerMode::Ship;
     Player player{playerRect.y, playerRect.h};
     player.setMode(startingMode);
@@ -87,6 +88,10 @@ int main(int argc, char* argv[]) {
 
     const auto& spikes = level.getSpikes();
     const auto& blocks = level.getBlocks();
+    const auto& portals = level.getPortals();
+
+    // Each portal can activate once per attempt, even if we stay inside its hitbox.
+    std::vector<bool> activatedPortals(portals.size(), false);
 
     // Leave a clear runout after the last object, then finish the level.
     float lastObjectRight = playerRect.x;
@@ -96,6 +101,10 @@ int main(int argc, char* argv[]) {
     }
     for (const Spike& spike : spikes) {
         const SDL_FRect rect = spike.getVisualRect(0.0f);
+        lastObjectRight = std::max(lastObjectRight, rect.x + rect.w);
+    }
+    for (const Portal& portal : portals) {
+        const SDL_FRect rect = portal.getVisualRect(0.0f);
         lastObjectRight = std::max(lastObjectRight, rect.x + rect.w);
     }
     const float finishX = lastObjectRight + 12.0f * blockSize;
@@ -131,6 +140,7 @@ int main(int argc, char* argv[]) {
             playerRect.h
         };
         player.setMode(startingMode);
+        std::fill(activatedPortals.begin(), activatedPortals.end(), false);
 
 
         // Reset stuff
@@ -275,6 +285,17 @@ int main(int argc, char* argv[]) {
                 break; // Leave the physics loop; drawing below still runs.
             }
 
+            // Surviving contact with a portal changes mode without resetting momentum.
+            for (std::size_t i = 0; i < portals.size(); ++i) {
+                if (activatedPortals[i]) continue;
+
+                const SDL_FRect hitbox = portals[i].getHitbox(scrollX);
+                if (SDL_HasRectIntersectionFloat(&playerRect, &hitbox)) {
+                    player.setMode(portals[i].getTargetMode());
+                    activatedPortals[i] = true;
+                }
+            }
+
             if (playerRect.x + scrollX >= finishX) {
                 levelComplete = true;
                 accumulator = 0.0;
@@ -315,6 +336,10 @@ int main(int argc, char* argv[]) {
             block.draw(renderer, scrollX, true);
         }
 
+        for (std::size_t i = 0; i < portals.size(); ++i) {
+            portals[i].draw(renderer, scrollX, activatedPortals[i]);
+        }
+
         // Green flag marks the end of the clear runout.
         const SDL_FRect finishPole{finishX - scrollX, floorRect.y - 160.0f, 4.0f, 160.0f};
         const SDL_FRect finishFlag{finishPole.x + finishPole.w, finishPole.y, 44.0f, 24.0f};
@@ -350,6 +375,11 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(renderer, 255, 210, 50, alpha);
         SDL_RenderFillRect(renderer, &drawRect);
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE); // Restore normal drawing.
+
+        // Both modes use a square for now, so show which controls are active.
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderDebugText(renderer, 10.0f, 10.0f,
+                            player.getMode() == PlayerMode::Cube ? "Mode: CUBE" : "Mode: SHIP");
 
         if (levelComplete) {
             const SDL_FRect panel{180.0f, 210.0f, 440.0f, 120.0f};

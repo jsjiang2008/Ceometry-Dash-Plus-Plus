@@ -56,8 +56,10 @@ Level Level::loadFromFile(const std::filesystem::path& path,
         };
 
         // Check if valid type
-        if (type != "block" && type != "spike") {
-            fail("Unknown object type '" + type + "'; expected block or spike");
+        if (type != "block" && type != "spike" &&
+            type != "portal_cube" && type != "portal_ship") {
+            fail("Unknown object type '" + type +
+                 "'; expected block, spike, portal_cube, or portal_ship");
         }
 
         // Check if valid parameters
@@ -94,11 +96,15 @@ Level Level::loadFromFile(const std::filesystem::path& path,
             fail("Object coordinates or dimensions are outside the supported range");
         }
 
-        // Add object in as either block or spike
+        // Portal types use the same grid coordinates and validation as obstacles.
         if (type == "block") {
             level.blocks.emplace_back(x, y, w, h);
         } else if (type == "spike") {
             level.spikes.emplace_back(x, y, w, h);
+        } else {
+            const PlayerMode mode = type == "portal_cube"
+                ? PlayerMode::Cube : PlayerMode::Ship;
+            level.portals.emplace_back(x, y, w, h, mode);
         }
     }
 

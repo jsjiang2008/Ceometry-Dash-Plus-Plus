@@ -4,12 +4,14 @@
 #include <vector>
 
 #include "Block.hpp"
+#include "Portal.hpp"
 #include "Spike.hpp"
 
 class Level {
 private:
     std::vector<Block> blocks;
     std::vector<Spike> spikes;
+    std::vector<Portal> portals;
 
 public:
     // Read grid coordinates and convert them into world-space rectangles.
@@ -23,5 +25,9 @@ public:
 
     const std::vector<Spike>& getSpikes() const {
         return spikes;
+    }
+
+    const std::vector<Portal>& getPortals() const {
+        return portals;
     }
 };

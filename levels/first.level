@@ -1,4 +1,4 @@
-# Stereo-inspired: a forgiving cube-only first level.
+# Stereo Madness inspired: a forgiving cube-only first level.
 # Each line: type column row width height, measured in grid cells.
 # Row 0 rests on the floor. No portals, music, or ship mechanics required.
 # About one minute at the current normal speed. The last spike ends at 624;

@@ -69,7 +69,24 @@ The floor and block tops remain safe landing surfaces. Press R to restart
 manually; both restart paths restore the configured starting mode.
 
 Reach the green flag to finish. This course uses the current prototype ship
-physics and square graphic; portals are a later step.
+physics and square graphic.
+
+## Portal test level
+
+```bash
+cmake --build build --target ceometry-dash -j 2
+./build/ceometry-dash levels/portal_test.level
+```
+
+This clear test area has a cube gate, a ship gate, and another cube gate.
+Green gates select cube mode; blue gates select ship mode. Touching a gate
+changes movement mode while preserving position and vertical momentum.
+The mode label at the top left shows which controls are active.
+
+Each gate activates once per attempt and turns gray after use. R and death
+reset every gate and restore `startingMode`. The gates are not solid and
+do not cause damage. Overlapping gates activate in file order if touched
+in the same physics step. The finish flag also accounts for portal positions.
 
 ## Level format
 
@@ -79,7 +96,7 @@ Each nonempty line describes one object:
 type column row width height
 ```
 
-- `type` is `block` or `spike`.
+- `type` is `block`, `spike`, `portal_cube`, or `portal_ship`.
 - All four numbers are in grid cells; one cell is currently 40 pixels.
 - `column` is the left edge, measured rightward from the level's origin.
 - `row` is the bottom edge, measured upward from the floor. Row 0 rests on it.
@@ -98,6 +115,10 @@ spike 10 2 1 1
 spike 20 0 1 1
 spike 21 0 1 1
 spike 22 0 1 1
+
+# A ship portal, then a cube portal; each is one cell wide and three tall.
+portal_ship 40 0 1 3
+portal_cube 100 0 1 3
 ```
 
 The loader converts these to pixels with:
@@ -110,8 +131,8 @@ heightPixels = height * blockSize
 ```
 
 An invalid line stops loading and reports the file name, line number, and
-reason in the terminal. The format currently describes blocks and spikes;
+reason in the terminal. The format describes blocks, spikes, and mode portals;
 player physics, floor height, and scrolling speed remain configured in C++.
 
-`include/Level.hpp` owns vectors of blocks and spikes, and `src/core/Level.cpp`
+`include/Level.hpp` owns vectors of blocks, spikes, and portals, and `src/core/Level.cpp`
 reads the file. Vectors allow different levels to have different object counts.

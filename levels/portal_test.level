@@ -1,0 +1,11 @@
+# A clear area for trying both portal types (about six seconds long).
+# These full-height gates catch the player anywhere between the floor and screen top.
+# The first gate selects Cube regardless of the startingMode setting in main.cpp.
+# Watch the mode label; hold Space/Up to feel the change between jumping and flying.
+# Used gates turn gray. R or death restores their original colors and startingMode.
+
+portal_cube 8 0 1 3
+portal_ship 20 0 1 3
+portal_cube 52 0 1 3
+
+# No obstacles: focus on the controls. Finish twelve cells after the final gate.
